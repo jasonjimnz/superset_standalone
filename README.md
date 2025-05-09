@@ -24,6 +24,9 @@ This application allows you to generate various types of datasets
 including customers, products, companies, and transactions, 
 as well as custom datasets based on Faker providers.
 
+The Dataset Generator instance can be deployed using Docker pulling: `jasonjimnz/streamlit_data_generator` 
+or going into: [https://hub.docker.com/r/jasonjimnz/streamlit_data_generator](https://hub.docker.com/r/jasonjimnz/streamlit_data_generator)
+
 ## Features
 
 - Generate customer data with various fields (name, email, address, etc.)
@@ -39,6 +42,65 @@ as well as custom datasets based on Faker providers.
 
 - Docker and Docker Compose
 - Python 3.11+ (if running locally)
+
+## Quick Start with Docker compose without cloning this repo:
+
+The following `docker-compose` will give you everything working 
+in one command, for connecting to your postgres container the host
+will be `postgres`
+
+```yaml
+# docker-compose.yml
+services:
+  superset_service:
+    image: jasonjimnz/superset_standalone:latest
+    container_name: superset_app
+    restart: unless-stopped
+    ports:
+      - "8008:8008"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+  streamlit:
+    image: jasonjimnz/streamlit_data_generator:latest
+    container_name: dataset_generator
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./exports:/opt/app/exports
+      - duckdb_data:/opt/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    container_name: dataset_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=datasets
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  duckdb_data:
+```
 
 ## Quick Start with Docker
 
