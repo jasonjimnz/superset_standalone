@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  superset_service:
+    image: jasonjimnz/superset_standalone:latest
+    container_name: superset_app
+    restart: unless-stopped
+    ports:
+      - "8008:8008"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+  streamlit:
+    build:
+      context: .
+      dockerfile: streamlit.Dockerfile
+    container_name: dataset_generator
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./streamlit_app:/opt/app/streamlit_app
+      - ./exports:/opt/app/exports
+      - duckdb_data:/opt/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    container_name: dataset_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=datasets
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    restart: unless-stopped
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  duckdb_data:
