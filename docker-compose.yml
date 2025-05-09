@@ -12,9 +12,7 @@ services:
     networks:
       - app-network
   streamlit:
-    build:
-      context: .
-      dockerfile: streamlit.Dockerfile
+    image: jasonjimnz/streamlit_data_generator:1.1
     container_name: dataset_generator
     ports:
       - "8501:8501"

@@ -134,8 +134,7 @@ def transfer_data_to_postgres(table_name, conn):
 
         # Generate the INSERT query
         columns_str = ", ".join(data.columns)
-        placeholders = ", ".join(["%s"] * len(data.columns))
-        insert_query = f"INSERT INTO {table_name} ({columns_str}) VALUES ({placeholders})"
+        insert_query = f"INSERT INTO {table_name} ({columns_str}) VALUES %s"
 
         # Execute the query with execute_values for better performance
         execute_values(cursor, insert_query, values)
